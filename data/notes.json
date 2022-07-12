@@ -1,12 +1,14 @@
-    {
-        "notes": [
-            {
-        "title":"test",
-        "text":"test"
-            },
-            {
-                "title":"test2",
-                "text":"test2"
-            }
-        ]
-    }
+{
+    "notes": [
+        {
+            "title": "test",
+            "text": "test",
+            "index": "0"
+        },
+        {
+            "title": "test2",
+            "text": "test2",
+            "index": "1"
+        }
+    ]
+}
