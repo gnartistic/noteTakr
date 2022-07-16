@@ -31,7 +31,9 @@ app.post('/api/notes', (req, res) => {
 app.delete('/api/notes/:id', (req, res) => {
     console.log(`A saved note was deleted!`)
     notes.forEach((note, i) => {
-        if (note.id === req.params.id) { notes.splice(i, 1) };
+        if (note.id === req.params.id) {
+            notes.splice(i, 1)
+        };
     });
 
     // db.splice(db.indexOf(req.params.id), 1);
