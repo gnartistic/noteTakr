@@ -4,7 +4,7 @@
   deployment:https://note-takrrr.herokuapp.com/notes  
 
   ## Walkthrough Video
-  ![VIDEO](https://vimeo.com/manage/videos/730550631)
+  [![VIDEO](/assets/images/play.png)](https://vimeo.com/manage/videos/730550631)
   ## Description
   
   This app creates and stores notes. It was created using various front-end and back-end technologies, such as Node.js, multiple npm packages, html, and good ol JavaScript. Visiting the deployed application allows the user to enter some text as a 'note', and have it stored to a remote database on the application's server. The option to delete saved notes is also availible, which would result in removing the stored 'note' data from the remote database.
