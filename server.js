@@ -1,98 +1,49 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const PORT = process.env.PORT || 3001;
-const { notes } = require('./data/notes');
+const { v4: uuidv4 } = require('uuid');
+const notes = require('./db/notes.json');
+
 const app = express();
+const PORT = process.env.PORT || 3001;
 
-// make public directory static
 app.use(express.static('public'));
-// parse incoming string or array data
-app.use(express.urlencoded({ extended: true }));
-// parse incoming JSON data
 app.use(express.json());
-
-function filterByQuery(query, notesArray) {
-    let filteredResults = notesArray;
-    if (query.title) {
-        filteredResults = filteredResults.filter(notes => notes.title === query.title);
-    }
-    if (query.text) {
-        filteredResults = filteredResults.filter(notes => notes.text === query.text);
-    }
-    if (query.index) {
-        filteredResults = filteredResults.filter(notes => notes.index === query.index);
-    }
-    return filteredResults;
-}
-
-function findByIndex(index, notesArray) {
-    const result = notesArray.filter(notes => notes.index === index)[0];
-    return result;
-}
-
-function createNewNote(body, notesArray) {
-    const note = body;
-
-    notesArray.push(note);
-    fs.writeFileSync(
-        path.join(__dirname, './data/notes.json'),
-        JSON.stringify({ notes: notesArray }, null, 2)
-    );
-    return note;
-}
-
-function validateNote(note) {
-    if (!note.title || typeof note.title !== 'string') {
-        return false;
-    }
-    if (!note.text || typeof note.text !== 'string') {
-        return false;
-    }
-    if (!note.index || typeof note.index !== 'string') {
-        return false;
-    }
-
-    return true;
-}
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/api/notes', (req, res) => {
-    let results = notes;
-    if (req.query) {
-        results = filterByQuery(req.query, results);
-    }
-    res.json(results);
-});
-
-app.get('/api/notes/:index', (req, res) => {
-    const result = findByIndex(req.params.index, notes);
-    if (result) {
-        res.json(result);
-    } else {
-        res.sendStatus(404);
-    }
+    console.log(`Displaying saved notes...`)
+    res.json(notes);
 });
 
 app.post('/api/notes', (req, res) => {
-    // set id based on what the next index of the array will be
-    req.body.index = notes.length.toString();
-    // if any data in req.body is incorrect, send 400 error back
-    if (!validateNote(req.body)) {
-        res.status(400).send('The note is not properly formatted.');
-    } else {
-        const note = createNewNote(req.body, notes);
-        res.json(note);
-    }
+    console.log(`A new note was saved!`)
+
+    let newNote = req.body;
+    newNote.id = uuidv4();
+    notes.push(newNote);
+    fs.writeFileSync('./db/notes.json', JSON.stringify(notes), (err) => {
+        if (err) throw err;
+    });
+    res.send(notes);
 });
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/index.html'));
+app.delete('/api/notes/:id', (req, res) => {
+    console.log(`A saved note was deleted!`)
+    notes.forEach((note, i) => {
+        if (note.id === req.params.id) { notes.splice(i, 1) };
+    });
+
+    // db.splice(db.indexOf(req.params.id), 1);
+    fs.writeFile("db/notes.json", JSON.stringify(notes), (err) => {
+        if (err) throw err;
+    });
+    res.send(notes);
 });
 
-app.get('/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, './public/notes.html'));
-});
+app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, '/public/notes.html')));
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html')));
 
 app.listen(PORT, () => {
-    console.log(`API server now on port ${PORT}!`);
+    console.log(`API server now on ${PORT}`);
 });
